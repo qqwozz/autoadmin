@@ -1,0 +1,33 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: autoadmin-api
+    ports:
+      - "8080:8080"
+    volumes:
+      - sqlite_data:/data
+      - ./app:/app
+    environment:
+      - DB_PATH=/data/database.sqlite
+      - PORT=8080
+    restart: unless-stopped
+
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: autoadmin-bot
+    command: ["/app/autoadmin-bot"]
+    volumes:
+      - sqlite_data:/data
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+      - API_URL=http://api:8080
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  sqlite_data:
